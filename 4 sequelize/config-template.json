@@ -1,0 +1,18 @@
+{
+    "development":
+    {
+        "host":"server-goes-here",
+        "dialect":"mssql",
+        "name":"Employees",
+        "user":"username-goes-here",
+        "password":"password-goes-here"
+    },
+    "production":
+    {
+        "host":"rvc-sql.rvc.local",
+        "dialect":"mssql",
+        "name":"Employees",
+        "user":"username-goes-here",
+        "password":"password-goes-here"
+    }
+}
