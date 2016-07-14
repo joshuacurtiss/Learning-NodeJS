@@ -1,0 +1,21 @@
+{
+  "name": "sequelizetest",
+  "version": "0.1.0",
+  "description": "Testing Sequelize functionality.",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Joshua Curtiss <git@curtiss.me>",
+  "license": "ISC",
+  "dependencies": {
+    "sequelize": "^3.23.4"
+  }
+}
