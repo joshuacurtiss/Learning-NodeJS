@@ -16,6 +16,8 @@
   "author": "Joshua Curtiss <git@curtiss.me>",
   "license": "ISC",
   "dependencies": {
-    "sequelize": "^3.23.4"
+    "sequelize": "^3.23.4",
+    "sqlite3": "^3.1.4",
+    "tedious": "^1.14.0"
   }
 }
