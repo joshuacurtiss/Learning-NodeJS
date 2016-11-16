@@ -3,9 +3,9 @@
 // Sample Function
 function sampleUsage()
 {
-    Emp.findAll({ where: {fname:'John'}, order: 'lname' }).then(function(emps) {
+    Emp.findAll({ where: {fname:'John', positiontitle: {$ne:null}}, order: 'lname' }).then(function(emps) {
         emps.forEach(function(e){
-            console.log(`${e.get('fname')} ${e.get('lname')}`);
+            console.log(`${e.get('fname')} ${e.get('lname')} is a ${e.get('positiontitle')}.`);
         });
     });
 }
@@ -17,7 +17,7 @@ var Sequelize=require("sequelize");
 var sequelize=new Sequelize(config.name,config.user,config.password,{
     host:config.host,
     dialect:config.dialect,
-    pool: {max:5,min:0,idle:10000}
+    pool: {max:5,min:0,idle:500}
 });
 
 // Init Model
