@@ -1,0 +1,19 @@
+{
+  "name": "myfirstelectron",
+  "version": "1.0.0",
+  "description": "My first try to build an Electron app.",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuacurtiss/Learning-NodeJS.git"
+  },
+  "author": "Josh Curtiss <josh@curtiss.me>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS/issues"
+  },
+  "homepage": "https://github.com/joshuacurtiss/Learning-NodeJS#readme"
+}
