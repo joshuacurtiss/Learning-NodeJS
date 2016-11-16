@@ -2,9 +2,10 @@
   "name": "myfirstelectron",
   "version": "1.0.0",
   "description": "My first try to build an Electron app.",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "electron main.js"
+    "start": "electron main.js",
+    "build": "electron-packager . MyFirstElectronApp --ignore=node_modules/electron-* --out=builds --overwrite"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/joshuacurtiss/Learning-NodeJS/issues"
   },
-  "homepage": "https://github.com/joshuacurtiss/Learning-NodeJS#readme"
+  "homepage": "https://github.com/joshuacurtiss/Learning-NodeJS#readme",
+  "devDependencies": {
+    "electron-packager": "^8.2.0",
+    "electron-prebuilt": "^1.4.7"
+  }
 }
