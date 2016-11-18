@@ -10,13 +10,11 @@ app.use(bodyParser.urlencoded({
 
 // Controllers 
 var beerController = require('./controllers/beer');
+var userController = require('./controllers/user');
 
 // Connect to the beerlocker MongoDB
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/beerlocker');
-
-// Model
-var Beer = require('./models/beer');
 
 // Use environment defined port or 3000
 var port = process.env.PORT || 3000;
@@ -35,6 +33,11 @@ router.route('/beers/:beer_id')
   .put(beerController.putBeer)
   .delete(beerController.deleteBeer);
 
+// Create endpoint handlers for /users
+router.route('/users')
+  .post(userController.postUsers)
+  .get(userController.getUsers);
+  
 // Register all our routes with /api
 app.use('/api', router);
 
