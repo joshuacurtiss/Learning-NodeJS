@@ -5,7 +5,7 @@ var electronEjs = require('electron-ejs');
 function getArg(name)
 {
     var args=process.argv;
-    var i=1;
+    var i=0;
     while( i<args.length && args[i].toLowerCase().trim()!="--"+name.toLowerCase().trim() ) i+=1;
     if( i>=args.length ) return "";
     else return args[i+1];
@@ -17,6 +17,7 @@ var ejs = new electronEjs({
 }, {});
 
 app.on("ready", () => {
+    console.log("Displaying "+getArg("img")+" with message \""+getArg("message")+"\".");
     var win=new BrowserWindow({width:800, height:480, title:"ElectronApp", show:false});
     win.on('ready-to-show', function() {
         win.show();
@@ -24,5 +25,5 @@ app.on("ready", () => {
         win.setFullScreen(true);
     });
     win.loadURL(`file://${__dirname}/index.ejs`);
-    setTimeout(()=>{app.quit()},5000);
+    setTimeout(()=>{app.quit()},9000);
 });
