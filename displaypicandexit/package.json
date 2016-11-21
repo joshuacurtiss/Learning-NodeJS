@@ -1,0 +1,27 @@
+{
+  "name": "displaypicandexit",
+  "version": "1.0.0",
+  "description": "My first try to build an Electron app.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js --message \"Front Door\" --img \"img/open-door.jpg\"",
+    "build": "electron-packager . DispPicAndExit --platform=all --arch=all --out=dist --asar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuacurtiss/Learning-NodeJS.git"
+  },
+  "author": "Josh Curtiss <josh@curtiss.me>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS/issues"
+  },
+  "homepage": "https://github.com/joshuacurtiss/Learning-NodeJS#readme",
+  "devDependencies": {
+    "electron-packager": "^8.2.0",
+    "electron-prebuilt": "^1.4.7"
+  },
+  "dependencies": {
+    "electron-ejs": "^1.1.1"
+  }
+}
