@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron main.js --message \"Front Door\" --img \"img/open-door.jpg\"",
-    "build": "electron-packager . DispPicAndExit --platform=all --arch=all --out=dist --asar"
+    "build": "electron-packager . DispPicAndExit --platform=darwin,linux --arch=all --out=dist --asar --overwrite"
   },
   "repository": {
     "type": "git",
