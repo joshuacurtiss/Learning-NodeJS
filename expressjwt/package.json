@@ -1,0 +1,20 @@
+{
+  "name": "expressjwt",
+  "version": "0.1.0",
+  "description": "Web app using Express and consuming JWT for the login credentials.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Josh Curtiss <j.curtiss@rockvalleycollege.edu>",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "config": "^1.24.0",
+    "query-string": "^4.2.3",
+    "express": "^4.14.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS.git"
+  }
+}
