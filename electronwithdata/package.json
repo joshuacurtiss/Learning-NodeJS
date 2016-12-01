@@ -1,0 +1,27 @@
+{
+  "name": "electronwithdata",
+  "version": "1.0.0",
+  "description": "My first try to build an Electron app that passes some data into the windows. Piece of cake.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "build": "electron-packager . ElectronEjsApp --ignore=node_modules/electron-* --out=dist --asar --overwrite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuacurtiss/Learning-NodeJS.git"
+  },
+  "author": "Josh Curtiss <josh@curtiss.me>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuacurtiss/Learning-NodeJS/issues"
+  },
+  "homepage": "https://github.com/joshuacurtiss/Learning-NodeJS#readme",
+  "devDependencies": {
+    "electron-packager": "^8.2.0",
+    "electron-prebuilt": "^1.4.7"
+  },
+  "dependencies": {
+    "query-string": "^4.2.3"
+  }
+}
