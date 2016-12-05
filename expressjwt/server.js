@@ -15,13 +15,45 @@ app.use(morgan('dev'));
 
 app.get('/', (req, res)=>{
   var apiurl=`http://${req.headers.host}/api`;
-  res.send(`Hello! Access the API at <a href="${apiurl}">${apiurl}</a>.`)
+  var tokurl=config.get("tokenurl");
+  res.send(`
+    <p>Hello!</p>
+    </p>Access the API at <a href="${apiurl}">${apiurl}</a>.</p>
+    <p>Get a token: <a href="${tokurl}">${tokurl}</a>.</p>
+  `);
+});
+
+app.get("/token/:tok", (req,res)=>{
+  res.send(`
+  <style>code {display:block; width: 60%; word-wrap: break-word;}</style>
+  <p>Congratulations! You've got a token!</p>
+  <code>${req.params.tok}</code>
+  `);
 });
 
 var apiRoutes=express.Router();
 
 apiRoutes.get("/", (req, res)=>{
   res.json({message:"Welcome to my awesome API."});
+});
+
+apiRoutes.use((req,res,next)=>{
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+  if( token ) {
+    jwt.verify(token, config.get("secret"), (err,decoded)=>{
+      if( err ) {
+        return res.json({ success: false, message: 'Failed to authenticate token.' });    
+      } else {
+        req.decoded=decoded;
+        next();
+      }
+    });
+  } else {
+    return res.status(403).send({
+      success:false,
+      message: "No token provided."
+    })
+  }
 });
 
 apiRoutes.get("/users", (req, res)=>{
