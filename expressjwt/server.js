@@ -12,6 +12,8 @@ var ExtractJwt  = require('passport-jwt').ExtractJwt;
 
 passport.use(new JwtStrategy({
   secretOrKey: config.get("secret"),
+  issuer: config.get("tokenurl"),
+  audience: config.get("tokenaudience"),
   jwtFromRequest: ExtractJwt.fromAuthHeader()
 }, (jwt_payload,done)=>{
   var users=config.get("users");
