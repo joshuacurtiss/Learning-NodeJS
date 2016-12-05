@@ -1,3 +1,8 @@
 {
-    "port": 3000
+    "port": 3000,
+    "secret": "mygreatsecret",
+    "users": [
+        {"id":"12345", "fname":"Joe", "lname":"Blow", "title":"Programmer", "email":"Joe@foobar.com"},
+        {"id":"12346", "fname":"Jim", "lname":"Johnson", "title":"Programmer", "email":"Jim@foobar.com"}
+    ]
 }
