@@ -12,6 +12,11 @@ class User {
         return (this.id!="");
     }
 
+    get name() {
+        var out=this.fname+" "+this.lname;
+        return out.trim();
+    }
+
     toString() {
         var out=`${this.fname} ${this.lname} ` + (this.id.length?`(${this.id}) `:"") + (this.title.length?`(${this.title}) `:"") + (this.email.length?`<${this.email}>`:"");
         return out.trim();
