@@ -3,9 +3,25 @@ var express     = require('express');
 var app         = express();
 var bodyParser  = require('body-parser');
 var morgan      = require('morgan');
-var jwt         = require('jsonwebtoken');
 var util        = require('util');
 var User        = require("./model/user.js");
+
+var passport    = require('passport');
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt  = require('passport-jwt').ExtractJwt;
+
+passport.use(new JwtStrategy({
+  secretOrKey: config.get("secret"),
+  jwtFromRequest: ExtractJwt.fromAuthHeader()
+}, (jwt_payload,done)=>{
+  var users=config.get("users");
+  var user=users.find((u)=>{return (u.id.toLowerCase()==jwt_payload.usertype.toLowerCase()+jwt_payload.id)});
+  if( user ) {
+    done(null, jwt_payload);
+  } else {
+    done(null, false);
+  }
+}));
 
 const port=config.get("port");
 
@@ -37,31 +53,14 @@ apiRoutes.get("/", (req, res)=>{
   res.json({message:"Welcome to my awesome API."});
 });
 
-apiRoutes.use((req,res,next)=>{
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
-  if( token ) {
-    jwt.verify(token, config.get("secret"), (err,decoded)=>{
-      if( err ) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });    
-      } else {
-        req.decoded=decoded;
-        next();
-      }
-    });
-  } else {
-    return res.status(403).send({
-      success:false,
-      message: "No token provided."
-    })
-  }
-});
-
-apiRoutes.get("/users", (req, res)=>{
+apiRoutes.get("/users", passport.authenticate('jwt',{session:false}), (req, res)=>{
   var users=config.get("users");
+  var loginUser=new User(req.user);
+  console.log(`This page is being requested by ${loginUser}.`);
   res.json(users);
 });
 
-apiRoutes.get("/users/:id", (req, res)=>{
+apiRoutes.get("/users/:id", passport.authenticate('jwt',{session:false}), (req, res)=>{
   var users=config.get("users");
   var user=new User();
   var i=0;
