@@ -1,0 +1,72 @@
+<html>
+<head>
+    <title>Meeting for Service Countdown</title>
+    <style>
+        body {
+            margin:0;
+            overflow:hidden;
+            background-color:black;
+        }
+        video {
+            width: 100%;
+        }
+        #timer {
+            font-size: 10vh;
+            padding: 2vh 5vw;
+            position: absolute;
+            right: 10vw;
+            bottom: 10vh;
+            background-color:black;
+            opacity: 0.8;
+            border-radius: 15px;
+            color:white;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay>
+        <source type="video/mp4">
+    </video>
+    <div id="timer"></div>
+    <script>
+        // Dependencies
+        let config=require("config");
+        let moment=require("moment");
+        require("moment-duration-format");
+        let fs=require("fs");
+
+        // Functions
+        function getRandomInt(min, max) { // Returns a random number between min (inclusive) and max (exclusive)
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+        function updateTimer() {
+            var now=new moment();
+            var diff=moment.duration(goal.diff(now));
+            document.getElementById("timer").innerHTML=diff.format("h:mm:ss");
+            setTimeout(updateTimer,996);
+        }
+        function setVideo(f) {
+            var path=`${config.get("videoDirectory")}/${f}`;
+            var elem=document.getElementById("video");
+            var success=(elem.src!=path);
+            if( success ) elem.src=path;
+            return success;
+        }
+        function loadRandomVideo() {
+            if( ! setVideo(videos[getRandomInt(0,videos.length)]) && videos.length>1 ) loadRandomVideo();
+        }
+
+        // Determine available playlist and setup the video element
+        var videos=fs.readdirSync(config.get("videoDirectory"));
+        document.getElementById('video').addEventListener('ended',loadRandomVideo,false);
+
+        // Time
+        var today=new moment();
+        var goal=new moment(today.format("MM/DD/YY")+" "+config.get("time"));
+
+        // Start things up (pick a video, start timer)
+        loadRandomVideo();
+        updateTimer();
+    </script>
+</body>
+</html>
