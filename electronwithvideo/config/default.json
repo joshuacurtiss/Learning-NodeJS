@@ -1,0 +1,8 @@
+{
+    "time": "1:00:00 PM",
+    "videoDirectory": "video",
+    "doneVideo": "",
+    "donePic": "done/done-sample.png",
+    "phase2threshold": 600,
+    "phase1threshold": 60
+}

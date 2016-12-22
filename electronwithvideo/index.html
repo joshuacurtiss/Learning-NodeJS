@@ -1,25 +1,72 @@
 <html>
 <head>
-    <title>Meeting for Service Countdown</title>
+    <title>Video Player Countdown</title>
     <style>
         body {
             margin:0;
             overflow:hidden;
             background-color:black;
+            color:white;
         }
-        video {
-            width: 100%;
-        }
-        #timer {
-            font-size: 10vh;
-            padding: 2vh 5vw;
+        .widget {
             position: absolute;
-            right: 10vw;
-            bottom: 10vh;
             background-color:black;
             opacity: 0.8;
             border-radius: 15px;
-            color:white;
+            padding: 2vh 5vw;
+        }
+        #debug {
+            display: none;
+            font-size: 2vh;
+            right: 3vw;
+            top: 3vh;
+        }
+        #video {
+            width: 100%;
+        }
+        #video.phase1 {
+            opacity:0;
+        }
+        #timer {
+            bottom: -30vh;
+        }
+        #timer.phase3 {
+            opacity: 0.8;
+            font-size: 10vh;
+            right: 10vw;
+            text-align:center;
+        }
+        #timer.phase2 {
+            font-size: 10vh;
+            bottom: 10vh;
+        }
+        #timer.phase1 {
+            font-size: 36vh;
+            bottom: 32vh;
+            left: 30vw;
+            right: 30vw;
+            padding:0;
+            background-color: white;
+            color:black;
+        }
+        #timer.phase0 {
+            display:none;
+            bottom: -50vh;
+        }
+        #done {
+            opacity:0;
+            position:absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        #done video {
+            width: 100vw;
+            height: 100vh;
+        }
+        #done.phase0 {
+            opacity:1;
         }
     </style>
 </head>
@@ -27,29 +74,56 @@
     <video id="video" autoplay>
         <source type="video/mp4">
     </video>
-    <div id="timer"></div>
+    <div id="timer" class="widget"></div>
+    <div id="done">
+        <img id="donepic" />
+        <video id="donevideo" loop>
+            <source type="video/mp4">
+        </video>
+    </div>
+    <div id="debug" class="widget"></div>
     <script>
         // Dependencies
         let config=require("config");
         let moment=require("moment");
         require("moment-duration-format");
         let fs=require("fs");
+        let jQuery=$=require("./bower_components/jquery/dist/jquery.min.js");
+        require("./bower_components/jquery-ui/jquery-ui.min.js");
+
+        // Configure the done elements
+        if( config.get("doneVideo")||"" != "" ) $("#donevideo").attr("src",config.get("doneVideo"));
+        else if( config.get("donePic")||"" != "" ) $("#donepic").attr("src",config.get("donePic"));
 
         // Functions
+        var phase=9;
+        function setPhase(ph) {
+            if(phase!=ph) {
+                phase=ph;
+                $("#debug").html("Phase "+ph);
+                $("#timer, #video, #done").addClass("phase"+ph,750);
+                if(phase==0) document.getElementById("donevideo").play();
+            }
+        }
         function getRandomInt(min, max) { // Returns a random number between min (inclusive) and max (exclusive)
             return Math.floor(Math.random() * (max - min)) + min;
         }
         function updateTimer() {
             var now=new moment();
             var diff=moment.duration(goal.diff(now));
-            document.getElementById("timer").innerHTML=diff.format("h:mm:ss");
-            setTimeout(updateTimer,996);
+            var secs=diff.asSeconds();
+            $("#timer").html(diff.format("h:mm:ss"));
+            if( secs > config.get("phase2threshold") ) setPhase(3);
+            else if( secs > config.get("phase1threshold") ) setPhase(2);
+            else if( secs > 0 ) setPhase(1);
+            else setPhase(0);
+            if( secs>0 ) setTimeout(updateTimer,996);
         }
         function setVideo(f) {
             var path=`${config.get("videoDirectory")}/${f}`;
-            var elem=document.getElementById("video");
-            var success=(elem.src!=path);
-            if( success ) elem.src=path;
+            var $elem=$("#video");
+            var success=($elem.attr("src")!=path);
+            if( success ) $elem.attr("src",path);
             return success;
         }
         function loadRandomVideo() {
@@ -58,13 +132,14 @@
 
         // Determine available playlist and setup the video element
         var videos=fs.readdirSync(config.get("videoDirectory"));
-        document.getElementById('video').addEventListener('ended',loadRandomVideo,false);
+        $('#video').on('ended',loadRandomVideo);
 
         // Time
         var today=new moment();
         var goal=new moment(today.format("MM/DD/YY")+" "+config.get("time"));
 
         // Start things up (pick a video, start timer)
+        setPhase(3);
         loadRandomVideo();
         updateTimer();
     </script>
