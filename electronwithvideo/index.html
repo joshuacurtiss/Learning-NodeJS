@@ -61,7 +61,7 @@
             width: 100vw;
             height: 100vh;
         }
-        #done video {
+        #done video, #done img {
             width: 100vw;
             height: 100vh;
         }
@@ -92,8 +92,13 @@
         require("./bower_components/jquery-ui/jquery-ui.min.js");
 
         // Configure the done elements
-        if( config.get("doneVideo")||"" != "" ) $("#donevideo").attr("src",config.get("doneVideo"));
-        else if( config.get("donePic")||"" != "" ) $("#donepic").attr("src",config.get("donePic"));
+        if( config.get("doneVideo")||"" != "" ) {
+            $("#donevideo").attr("src",config.get("doneVideo"));
+            $("#donepic").remove();
+        } else if( config.get("donePic")||"" != "" ) {
+            $("#donepic").attr("src",config.get("donePic"));
+            $("#donevideo").remove();
+        }
 
         // Functions
         var phase=9;
@@ -122,16 +127,20 @@
         function setVideo(f) {
             var path=`${config.get("videoDirectory")}/${f}`;
             var $elem=$("#video");
-            var success=($elem.attr("src")!=path);
+            var success=($elem.attr("src")!=path || videos.length==1);
             if( success ) $elem.attr("src",path);
             return success;
         }
         function loadRandomVideo() {
-            if( ! setVideo(videos[getRandomInt(0,videos.length)]) && videos.length>1 ) loadRandomVideo();
+            if( videos.length && ! setVideo(videos[getRandomInt(0,videos.length)]) ) loadRandomVideo();
         }
 
         // Determine available playlist and setup the video element
-        var videos=fs.readdirSync(config.get("videoDirectory"));
+        try {
+            var videos=fs.readdirSync(config.get("videoDirectory"));
+        } catch(e) {
+            var videos=[];
+        }
         $('#video').on('ended',loadRandomVideo);
 
         // Time
