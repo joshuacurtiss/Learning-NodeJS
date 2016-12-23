@@ -25,7 +25,7 @@
         #video {
             height: 100vh;
         }
-        #video.phase1 {
+        #video.phase1, #video.phase0 {
             opacity:0;
         }
         #timer {
@@ -67,6 +67,9 @@
             width: 100vw;
             height: 100vh;
         }
+        #done.phase1, #done.phase2, #done.phase3 {
+            opacity:0;
+        }
         #done.phase0 {
             opacity:1;
         }
@@ -75,7 +78,7 @@
             position: absolute;
             background-color: #555;
             transition: opacity 0.5s ease;
-            border-radius: 10px;
+            border-radius: 15px;
             opacity:0;
             bottom: 3vh;
             left: 2vw;
@@ -90,6 +93,40 @@
             opacity: 1;
             cursor: pointer;
         }
+        #settingsForm {
+            position: absolute;
+            box-shadow: 3px 3px 15px black;
+            background-color: #ccc;
+            border: 1px solid #777;
+            border-radius: 15px;
+            top: 120vh;
+            height: 50vh;
+            left: 35vw;
+            width: 30vw;
+            opacity: 0.98;
+            color: black;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.3vh;
+            text-align:left;
+            padding: 1vh 1vw;
+        }
+        form div {clear:both; margin-bottom: 0.3vh;}
+        form h1 {margin:0.5vh 0 0 0; text-align:center; font-size: 2vh;}
+        form h2 {border-bottom: 1px solid black; margin: 1.5vh 0 0.5vh 0; font-size: 1.5vh; clear:both;}
+        form label {
+            font-weight:bold;
+            display:block;
+            float:left;
+            width:9vw;
+            text-align:right;
+            padding-top: 0.2vh;
+            padding-right: 0.5vw;
+        }
+        form input {font-size: 1.1vh; border-radius: 5px; padding: 0.1vh 0.2vw;}
+        form input[type=text] {width: 17vw;}
+        form input[type=time] {width: 9vw;}
+        form input[type=number] {width: 4vw;}
+        form button {font-size: 1.1vh; padding: 0.25vh 1vw; margin-left: 3vw; margin-top: 1vh;}
     </style>
 </head>
 <body>
@@ -107,6 +144,56 @@
         <img id="settings" src="img/gear.png" />
         <img id="quit" src="img/power.png" />
     </div>
+    <form id="settingsForm">
+        <h1>Settings</h1>
+        <p>
+            This app will randomly play videos from a given directory until a target time arrives.
+            As that time gets closer, the timer will become more prominent. When the time finally arrives,
+            a provided image or video will be displayed.
+        </p>
+        <h2>Video Library</h2>
+        <p>Any videos in this directory will be played in a random order.</p>
+        <div>
+            <label>Video Directory:</label>
+            <input type="text" id="frmVideoDirectory" />
+        </div>
+        <h2>Countdown Timer</h2>
+        <p>
+            You can provide the target time when the videos will stop playing. 
+            You can also specify when the timer will appear and when it will fill the screen, becoming
+            more prominent.
+        </p>
+        <div>
+            <label>Target Time:</label>
+            <input type="time" id="frmTime" />
+        </div>
+        <div>
+            <label>Start showing timer:</label>
+            <input type="number" id="frmPhase2threshold" /> seconds remaining.
+        </div>
+        <div>
+            <label>Fullscreen timer:</label>
+            <input type="number" id="frmPhase1threshold" /> seconds remaining.
+        </div>
+        <h2>Completion Media</h2>
+        <p>
+            The video or picture that you provide will be displayed when the timer runs to zero.
+            If you provide both, the video will be chosen and the picture will be ignored.
+        </p>
+        <div>
+            <label>Video:</label>
+            <input type="text" id="frmDoneVideo" />
+        </div>
+        <div>
+            <label>Picture:</label>
+            <input type="text" id="frmDonePic" />
+        </div>
+        <div>
+            <label>&nbsp;</label>
+            <button type="button" id="btnCancel">Cancel</button>
+            <button type="button" id="btnSave">Save</button>
+        </div>
+    </form>
     <div id="debug" class="widget"></div>
     <script>
         // Dependencies
@@ -124,23 +211,47 @@
         env=process.env.NODE_ENV || "default";
         let config=require(`./config/${env}.json`);
 
-        // Configure the done elements
-        if( config.doneVideo||"" != "" ) {
-            $("#donevideo").attr("src",config.doneVideo);
-            $("#donepic").remove();
-        } else if( config.donePic||"" != "" ) {
-            $("#donepic").attr("src",config.donePic);
-            $("#donevideo").remove();
+        // Settings Form 
+        function displaySettings() {
+            $("#settingsForm")
+                .find("#frmVideoDirectory").val(config.videoDirectory).end()
+                .find("#frmTime").val(config.time).end()
+                .find("#frmPhase2threshold").val(config.phase2threshold).end()
+                .find("#frmPhase1threshold").val(config.phase1threshold).end()
+                .find("#frmDoneVideo").val(config.doneVideo).end()
+                .find("#frmDonePic").val(config.donePic).end()
+                .animate({"top":"20vh"},400);
         }
+        function hideSettings() {
+            $("#settingsForm").animate({"top":"120vh"},200);
+        }
+        function saveSettings() {
+            hideSettings();
+            config.time=$("#frmTime").val();
+            config.videoDirectory=$("#frmVideoDirectory").val();
+            config.phase2threshold=$("#frmPhase2threshold").val();
+            config.phase1threshold=$("#frmPhase1threshold").val();
+            config.doneVideo=$("#frmDoneVideo").val();
+            config.donePic=$("#frmDonePic").val();
+            fs.writeFile(`./config/${env}.json`,JSON.stringify(config));
+            initApp();
+        }
+        $("#btnCancel").click(hideSettings);
+        $("#btnSave").click(saveSettings);
+
+        // Globals 
+        var phase=9;
+        var timer;
+        var videos=[];
+        var goal;
 
         // Functions
-        var phase=9;
         function setPhase(ph) {
             if(phase!=ph) {
                 phase=ph;
                 $("#debug").html("Phase "+ph);
                 $("#timer, #video, #done").addClass("phase"+ph,750);
-                if(phase==0 && document.getElementById("donevideo")) document.getElementById("donevideo").play();
+                if(phase==0 && $("#donevideo").is(":visible")) document.getElementById("donevideo").play();
             }
         }
         function getRandomInt(min, max) { // Returns a random number between min (inclusive) and max (exclusive)
@@ -155,7 +266,7 @@
             else if( secs > config.phase1threshold ) setPhase(2);
             else if( secs > 0 ) setPhase(1);
             else setPhase(0);
-            if( secs>0 ) setTimeout(updateTimer,996);
+            if( secs>0 ) timer=setTimeout(updateTimer,996);
         }
         function setVideo(f) {
             var path=`${config.videoDirectory}/${f}`;
@@ -167,24 +278,40 @@
         function loadRandomVideo() {
             if( videos.length && ! setVideo(videos[getRandomInt(0,videos.length)]) ) loadRandomVideo();
         }
-
-        // Determine available playlist and setup the video element
-        try {
-            var videos=fs.readdirSync(config.videoDirectory);
-        } catch(e) {
-            var videos=[];
+        function initApp() {
+            // Some cleanup if restarting
+            $("#timer, #video, #done").removeClass("phase3 phase2 phase1 phase0");
+            if(timer) clearTimeout(timer);
+            // Done materials
+            if( config.doneVideo||"" != "" ) {
+                $("#donevideo").show().attr("src",config.doneVideo);
+                $("#donepic").hide();
+            } else if( config.donePic||"" != "" ) {
+                $("#donepic").show().attr("src",config.donePic);
+                $("#donevideo").hide();
+            }
+            // Time
+            var today=new moment();
+            goal=new moment(today.format("MM/DD/YY")+" "+config.time);
+            // Determine available playlist and setup the video element
+            try {
+                videos=fs.readdirSync(config.videoDirectory);
+            } catch(e) {
+                videos=[];
+            }
+            // Final run
+            setPhase(3);
+            loadRandomVideo();
+            updateTimer();
         }
-        $('#video').on('ended',loadRandomVideo);
 
-        // Time
-        var today=new moment();
-        var goal=new moment(today.format("MM/DD/YY")+" "+config.time);
+        $('#video').on('ended',loadRandomVideo);
 
         // Quit/Settings Buttons
         var btnpanelStatus=false;
         var btnpanelTimeout;
         $("#quit").click(()=>{main.quit()});
-        $("#settings").click(()=>{main.settings()});
+        $("#settings").click(displaySettings);
         $(window).mousemove(()=>{
             var currentStatus=btnpanelStatus;
             btnpanelStatus=true;
@@ -196,9 +323,7 @@
         })
         
         // Start things up (pick a video, start timer)
-        setPhase(3);
-        loadRandomVideo();
-        updateTimer();
+        initApp();
     </script>
 </body>
 </html>
