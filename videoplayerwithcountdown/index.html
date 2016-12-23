@@ -84,19 +84,22 @@
     <div id="debug" class="widget"></div>
     <script>
         // Dependencies
-        let config=require("config");
         let moment=require("moment");
         require("moment-duration-format");
         let fs=require("fs");
         let jQuery=$=require("./bower_components/jquery/dist/jquery.min.js");
         require("./bower_components/jquery-ui/jquery-ui.min.js");
 
+        // Get Configs
+        env=process.env.NODE_ENV || "default";
+        let config=require(`./config/${env}.json`);
+
         // Configure the done elements
-        if( config.get("doneVideo")||"" != "" ) {
-            $("#donevideo").attr("src",config.get("doneVideo"));
+        if( config.doneVideo||"" != "" ) {
+            $("#donevideo").attr("src",config.doneVideo);
             $("#donepic").remove();
-        } else if( config.get("donePic")||"" != "" ) {
-            $("#donepic").attr("src",config.get("donePic"));
+        } else if( config.donePic||"" != "" ) {
+            $("#donepic").attr("src",config.donePic);
             $("#donevideo").remove();
         }
 
@@ -107,7 +110,7 @@
                 phase=ph;
                 $("#debug").html("Phase "+ph);
                 $("#timer, #video, #done").addClass("phase"+ph,750);
-                if(phase==0) document.getElementById("donevideo").play();
+                if(phase==0 && document.getElementById("donevideo")) document.getElementById("donevideo").play();
             }
         }
         function getRandomInt(min, max) { // Returns a random number between min (inclusive) and max (exclusive)
@@ -118,14 +121,14 @@
             var diff=moment.duration(goal.diff(now));
             var secs=diff.asSeconds();
             $("#timer").html(diff.format("h:mm:ss"));
-            if( secs > config.get("phase2threshold") ) setPhase(3);
-            else if( secs > config.get("phase1threshold") ) setPhase(2);
+            if( secs > config.phase2threshold ) setPhase(3);
+            else if( secs > config.phase1threshold ) setPhase(2);
             else if( secs > 0 ) setPhase(1);
             else setPhase(0);
             if( secs>0 ) setTimeout(updateTimer,996);
         }
         function setVideo(f) {
-            var path=`${config.get("videoDirectory")}/${f}`;
+            var path=`${config.videoDirectory}/${f}`;
             var $elem=$("#video");
             var success=($elem.attr("src")!=path || videos.length==1);
             if( success ) $elem.attr("src",path);
@@ -137,7 +140,7 @@
 
         // Determine available playlist and setup the video element
         try {
-            var videos=fs.readdirSync(config.get("videoDirectory"));
+            var videos=fs.readdirSync(config.videoDirectory);
         } catch(e) {
             var videos=[];
         }
@@ -145,7 +148,7 @@
 
         // Time
         var today=new moment();
-        var goal=new moment(today.format("MM/DD/YY")+" "+config.get("time"));
+        var goal=new moment(today.format("MM/DD/YY")+" "+config.time);
 
         // Start things up (pick a video, start timer)
         setPhase(3);
